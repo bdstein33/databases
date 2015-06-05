@@ -9,11 +9,11 @@ var dbConnection = mysql.createConnection({
   database: "chat"
 });
 
-exports.dbAccess = function(queryString, cb) {
-  dbConnection.connect();
+exports.access = function(queryString, cb) {
+  // dbConnection.connect();
   dbConnection.query(queryString, function(err, rows) {
     if (err) throw err;
     cb(rows);
   });
-  dbConnection.end();
+  // dbConnection.end();
 };
