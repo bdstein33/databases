@@ -1,9 +1,19 @@
 //https://api.parse.com/1/classes/chatterbox
 var app = {};
 app.allMessages = {};
-app.lastUpdate = 0;
-app.server = 'http://127.0.0.1:3000/classes/users';
+app.lastAddedId = -1;
+app.server = 'http://127.0.0.1:3000/classes/messages';
 app.friendList = [];
+
+function twoDigits(d) {
+    if(0 <= d && d < 10) return "0" + d.toString();
+    if(-10 < d && d < 0) return "-0" + (-1*d).toString();
+    return d.toString();
+}
+
+Date.prototype.toMySqlFormat = function() {
+    return this.getUTCFullYear() + "-" + twoDigits(1 + this.getUTCMonth()) + "-" + twoDigits(this.getUTCDate()) + " " + twoDigits(this.getUTCHours()) + ":" + twoDigits(this.getUTCMinutes()) + ":" + twoDigits(this.getUTCSeconds());
+};
 
 // pull messages data
 app.fetch = function() {
@@ -12,8 +22,7 @@ app.fetch = function() {
     type: 'GET',
     contentType: 'application/json',
     success: function (data) {
-      app.populateMessages(data.results, app.lastUpdate);
-      //app.lastUpdate = new Date();
+      app.populateMessages(data, app.lastAddedId);
       app.addRooms();
       $('.message-container-title').text("All Messages");
     },
@@ -30,10 +39,10 @@ app.sanitize = function (string) {
 
 // add messages to app.AddMessages object if they haven't already been added
 // use startTime to determine from what point on we should add messages
-app.populateMessages = function(messages, startTime) {
-  app.lastUpdate = messages[0].createdAt;
+app.populateMessages = function(messages, lastAddedId) {
+  app.lastAddedId = messages[messages.length -1].id;
   _.each(messages, function(message) {
-    if (moment(message.createdAt).isAfter(startTime)) {
+    if (message.id > lastAddedId) {
       app.addMessage(message);
     }
   });
@@ -50,7 +59,7 @@ app.populateMessages = function(messages, startTime) {
 app.addMessage = function(message) {
   var text = app.sanitize(message.text);
   var username = app.sanitize(message.username);
-  var date = moment(app.sanitize(message.createdAt)).fromNow();
+  var date = app.sanitize(message.created_at);
   var roomname = app.sanitize(message.roomname);
   roomname = roomname.replace(/^\s+/g, '').replace(/\s+$/g, '');
   if (roomname.length === 0) {
@@ -76,9 +85,9 @@ app.send = function(messageData) {
     'username': messageData.username,
     'text': messageData.text,
     'roomname': messageData.roomname,
-    'createdAt' : new Date()
+    'createdAt' : new Date().toMySqlFormat()
   };
-
+  console.log(message.createdAt);
   $.ajax({
     url: app.server,
     type: 'POST',
@@ -104,7 +113,7 @@ app.send = function(messageData) {
 //remove all messages from DOM
 app.clearMessages = function() {
   $('.message').remove();
-  app.lastUpdate = 0;
+  app.lastAddedId = -1;
   $('.message-container-title').text('Refresh to See Messages');
   $('.side-bar-room, .side-bar-friend').remove();
 };

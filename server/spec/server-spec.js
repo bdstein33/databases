@@ -4,6 +4,15 @@
 var mysql = require('mysql');
 var request = require("request"); // You might need to npm install the request module!
 var expect = require('../../node_modules/chai/chai').expect;
+function twoDigits(d) {
+    if(0 <= d && d < 10) return "0" + d.toString();
+    if(-10 < d && d < 0) return "-0" + (-1*d).toString();
+    return d.toString();
+}
+
+Date.prototype.toMySqlFormat = function() {
+    return this.getUTCFullYear() + "-" + twoDigits(1 + this.getUTCMonth()) + "-" + twoDigits(this.getUTCDate()) + " " + twoDigits(this.getUTCHours()) + ":" + twoDigits(this.getUTCMinutes()) + ":" + twoDigits(this.getUTCSeconds());
+};
 
 describe("Persistent Node Chat Server", function() {
   var dbConnection;
@@ -29,6 +38,7 @@ describe("Persistent Node Chat Server", function() {
 
   it("Should insert posted messages to the DB", function(done) {
     // Post the user to the chat server.
+
     request({ method: "POST",
               uri: "http://127.0.0.1:3000/classes/users",
               json: { username: "Valjean" }
@@ -38,8 +48,9 @@ describe("Persistent Node Chat Server", function() {
               uri: "http://127.0.0.1:3000/classes/messages",
               json: {
                 username: "Valjean",
-                message: "In mercy's name, three days is all I need.",
-                roomname: "Hello"
+                text: "In mercy's name, three days is all I need.",
+                roomname: "Hello",
+                createdAt: '2015-06-06 01:41:43'
               }
       }, function () {
         // Now if we look in the database, we should find the
@@ -52,6 +63,8 @@ describe("Persistent Node Chat Server", function() {
 
         dbConnection.query(queryString, queryArgs, function(err, results) {
           // Should have one result:
+          console.log(results);
+          console.log(queryArgs);
           expect(results.length).to.equal(1);
 
           // TODO: If you don't have a column named text, change this test.
@@ -63,7 +76,7 @@ describe("Persistent Node Chat Server", function() {
     });
   });
 
-  it("Should output all messages from the DB", function(done) {
+  xit("Should output all messages from the DB", function(done) {
     // Let's insert a message into the db
 
 

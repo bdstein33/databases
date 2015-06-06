@@ -11,7 +11,24 @@ module.exports = {
         cb(data);
       });
     }, // a function which produces all the messages
-    post: function () {} // a function which can be used to insert a message into the database
+    post: function (data, cb) {
+      var queryString = 'INSERT INTO users (username) VALUES (\"' + data.username + '\");';
+      db.access(queryString, function(){
+        cb();
+      });
+
+      queryString = 'INSERT INTO rooms (roomname) VALUES (\"' + data.roomname + '\");';
+      db.access(queryString, function(){
+        cb();
+      });
+
+
+      queryString = 'INSERT INTO messages (text, username, roomname, created_at) VALUES (\"' + data.text + '\", \"' + data.username + '\", \"' + data.roomname + '\", \"' + data.createdAt + '\");';
+      console.log(queryString);
+      db.access(queryString, function(){
+        cb();
+      });
+    } // a function which can be used to insert a message into the database
   },
 
   users: {
@@ -22,7 +39,12 @@ module.exports = {
         cb(data);
       });
     },
-    post: function () {}
+
+    post: function (username, cb) {
+      var queryString = 'INSERT INTO users (username) VALUES ("' + username + '");';
+      db.access(queryString, function(){
+        cb();
+      });
+    }
   }
 };
-
