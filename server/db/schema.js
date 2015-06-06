@@ -32,28 +32,54 @@ exports.generateSchema = function() {
   });
 
   // Create User and Room table
-  User.sync({force: true});
-  Room.sync({force: true});
 
   // Add foreign key constraints to Message table
   Message.belongsTo(User, {foreignKey: 'user_id'});
+  User.hasMany(Message);
+
   Message.belongsTo(Room, {foreignKey: 'room_id'});
+  Room.hasMany(Message);
 
+  User.sync();
+  Room.sync();
+  Message.sync();
   // Create Message table
-  Message.sync({force: true});
+  // Message.sync({force: true});
 
-  User.sync().then(function(){
-    User.create({
-      username: 'Ben'
-    });
-    User.create({
-      username: 'Richard'
-    });
-  });
+  export.User;
+  export.
 
-  Room.sync().then(function(){
-    Room.create({
-      roomname: 'School'
-    });
-  });
-};
+  // User.sync().then(function(){
+  //   User.create({
+  //     username: 'Ben'
+  //   });
+
+
+  // });
+
+
+//   Room.sync().then(function(){
+//     Room.create({
+//       roomname: 'School'
+//     });
+//   });
+//   // Message.create({
+//   //     text: 'New Message',
+//   //     user_id: 1,
+//   //     room_id: 1
+//   //   }).then(function(){
+//   //     console.log("--------------");
+//   //     console.log(this.username);
+//   //     console.log("--------------");
+//   // });
+//   var msg = Message.build({
+//     text: "Im ready for lunch",
+//     user_id: 2,
+//     room_id: 1
+//   });
+//   console.log("-------");
+//   console.log(msg.username);
+//   console.log("-------");
+//   msg.save();
+
+// };
