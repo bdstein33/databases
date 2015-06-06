@@ -4,15 +4,7 @@
 var mysql = require('mysql');
 var request = require("request"); // You might need to npm install the request module!
 var expect = require('../../node_modules/chai/chai').expect;
-function twoDigits(d) {
-    if(0 <= d && d < 10) return "0" + d.toString();
-    if(-10 < d && d < 0) return "-0" + (-1*d).toString();
-    return d.toString();
-}
 
-Date.prototype.toMySqlFormat = function() {
-    return this.getUTCFullYear() + "-" + twoDigits(1 + this.getUTCMonth()) + "-" + twoDigits(this.getUTCDate()) + " " + twoDigits(this.getUTCHours()) + ":" + twoDigits(this.getUTCMinutes()) + ":" + twoDigits(this.getUTCSeconds());
-};
 
 describe("Persistent Node Chat Server", function() {
   var dbConnection;
@@ -58,13 +50,19 @@ describe("Persistent Node Chat Server", function() {
 
         // TODO: You might have to change this test to get all the data from
         // your message table, since this is schema-dependent.
-        var queryString = "SELECT * FROM messages";
+        var queryString = "SELECT * FROM messages;";
         var queryArgs = [];
 
-        dbConnection.query(queryString, queryArgs, function(err, results) {
+        dbConnection = mysql.createConnection({
+          user: "root",
+          password: "",
+          database: "chat"
+        });
+
+        dbConnection.query(queryString, function(err, results) {
           // Should have one result:
+          console.log(err);
           console.log(results);
-          console.log(queryArgs);
           expect(results.length).to.equal(1);
 
           // TODO: If you don't have a column named text, change this test.
@@ -72,6 +70,7 @@ describe("Persistent Node Chat Server", function() {
 
           done();
         });
+
       });
     });
   });

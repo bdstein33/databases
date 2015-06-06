@@ -10,7 +10,7 @@ var dbConnection = mysql.createConnection({
 });
 
 exports.access = function(queryString, cb) {
-  dbConnection.query(queryString, function(err, rows) {
-    cb(rows);
+  dbConnection.query(queryString, function(err, data) {
+    cb(data);
   });
 };
